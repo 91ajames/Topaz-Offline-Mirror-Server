@@ -2,7 +2,7 @@ import subprocess
 
 from pathlib import Path
 
-VERSION = "v 4.0.0"
+VERSION = "v 4.2.0"
 VERSION_FILE = VERSION.replace(" ", "_")
 
 DEST = r"C:\TopazMirror\v1"
@@ -444,23 +444,44 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
         f.write("echo.\n\n")
     f.write("echo.\n")
     f.write("echo ===========================================\n")
-    f.write("echo Checking for missing files...\n")
+    f.write("echo           Missing File Report\n")
     f.write("echo ===========================================\n")
-    f.write("set MISSING_COUNT=0\n\n")
+    f.write("set MISSING_COUNT=0\n")
+    f.write("echo.\n")
+    f.write('del "%MIRROR_ROOT%\\MissingFiles.txt" >nul 2>&1\n')
 
     for name in files:
         safe_name = safe_echo(name)
         f.write(f'if not exist "%DEST%\\{name}" (\n')
-        f.write(f"    echo MISSING: {safe_name}\n")
         f.write("    set /a MISSING_COUNT+=1\n")
+        f.write(f"    echo    {safe_name}\n")
+        f.write(f'    echo {safe_name}>>"%MIRROR_ROOT%\\MissingFiles.txt"\n')
         f.write(")\n")
 
-    f.write("\n")
     f.write("echo.\n")
     f.write('if "%MISSING_COUNT%"=="0" (\n')
-    f.write("    echo All files are present.\n")
+    f.write("    echo All model files are present.\n")
+    f.write('    echo All model files are present.>"%MIRROR_ROOT%\\MissingFiles.txt"\n')
     f.write(") else (\n")
-    f.write("    echo Missing files: %MISSING_COUNT%\n")
+    f.write("    echo ===========================================\n")
+    f.write("    echo Missing Files: %MISSING_COUNT%\n")
+    f.write('    echo Missing list saved to: "%MIRROR_ROOT%\\MissingFiles.txt"\n')
+    f.write("    echo ===========================================\n")
+    f.write(")\n")
+    f.write("echo.\n")
+
+    f.write(f'if not exist "%DEST%\\{name}" (\n')
+    f.write("    set /a MISSING_COUNT+=1\n")
+    f.write(f"    echo    {safe_name}\n")
+    f.write(")\n")
+
+    f.write("echo.\n")
+    f.write('if "%MISSING_COUNT%"=="0" (\n')
+    f.write("    echo All model files are present.\n")
+    f.write(") else (\n")
+    f.write("    echo ===========================================\n")
+    f.write("    echo Missing Files: %MISSING_COUNT%\n")
+    f.write("    echo ===========================================\n")
     f.write(")\n")
     f.write("echo.\n")
 
@@ -485,7 +506,7 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
     f.write('    echo.\n')
     f.write('    echo Starting Topaz Mirror Server...\n')
     f.write('    echo.\n')
-    f.write('    echo Please modify your C:\Windows\System32\Drivers\et\host...\n')
+    f.write(r'   echo Please modify your C:\Windows\System32\Drivers\etc\hosts...' + "\n")
     f.write('    echo.\n')
     f.write('    echo 192.168.25.1 models.topazlabs.com\n')
     f.write('    echo 192.168.25.1 et.topazlabs.com\n')
@@ -493,7 +514,7 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
     f.write('    echo 192.168.25.1 models-r2.topazlabs.com\n')
     f.write('    echo 192.168.25.1 models-bal.topazlabs.com\n')
     f.write('    echo.\n')
-    f.write('    echo Notice: 192.168.25.1 change if necessarily
+    f.write('    echo Notice: 192.168.25.1 change if necessarily.\n')
     f.write('    echo.\n')
     f.write('    cd /d "C:\\TopazMirror"\n')
     f.write('    py -3.14 -m http.server 80\n')
