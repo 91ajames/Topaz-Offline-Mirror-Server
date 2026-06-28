@@ -27,7 +27,6 @@ cd /d "%DEST%"
 echo Download folder:
 echo %CD%
 echo.
-@echo off
 
 echo Checking network...
 
@@ -55,8 +54,6 @@ echo      Starting download in 3 seconds...
 echo ===========================================
 timeout /t 3 /nobreak >nul
 echo.
-
-setlocal
 
 mkdir "C:\TopazMirror" 2>nul
 
