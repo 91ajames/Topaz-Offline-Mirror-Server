@@ -2,7 +2,7 @@ import subprocess
 
 from pathlib import Path
 
-VERSION = "v 2.5.0"
+VERSION = "v 4.0.0"
 VERSION_FILE = VERSION.replace(" ", "_")
 
 DEST = r"C:\TopazMirror\v1"
@@ -442,6 +442,27 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
         f.write("echo Already exists. Skipping.\n")
         f.write(f":NEXT_{i:04d}\n")
         f.write("echo.\n\n")
+    f.write("echo.\n")
+    f.write("echo ===========================================\n")
+    f.write("echo Checking for missing files...\n")
+    f.write("echo ===========================================\n")
+    f.write("set MISSING_COUNT=0\n\n")
+
+    for name in files:
+        safe_name = safe_echo(name)
+        f.write(f'if not exist "%DEST%\\{name}" (\n')
+        f.write(f"    echo MISSING: {safe_name}\n")
+        f.write("    set /a MISSING_COUNT+=1\n")
+        f.write(")\n")
+
+    f.write("\n")
+    f.write("echo.\n")
+    f.write('if "%MISSING_COUNT%"=="0" (\n')
+    f.write("    echo All files are present.\n")
+    f.write(") else (\n")
+    f.write("    echo Missing files: %MISSING_COUNT%\n")
+    f.write(")\n")
+    f.write("echo.\n")
 
     f.write("echo ===========================================\n")
     f.write("echo Started : %STARTTIME%\n")
