@@ -2,7 +2,7 @@ import subprocess
 
 from pathlib import Path
 
-VERSION = "5.0.0"
+VERSION = "5.0.3"
 VERSION_FILE = VERSION.replace(" ", "_")
 
 MIRROR_ROOT = Path(r"C:\TopazMirror")
@@ -12,6 +12,7 @@ TEST11 = MIRROR_ROOT / "1.1"
 TRACK = DEST / "track"
 BASE_URL = "http://models.topazlabs.com/v1"
 OUT_BAT = Path(fr"C:\TopazMirror\Topaz_Model_Downloader_{VERSION_FILE}.bat")
+NEUROSERVER_VERSION = "20260601.1"
 
 # Create required folders if they don't already exist
 for folder in (MIRROR_ROOT, DEST, TEST, TEST11, TRACK):
@@ -345,6 +346,17 @@ FILES_RAW = r"""
 ‎WhiteBalanceData-v2.bin                                                
 """
 
+NEUROSERVER_FILES = [
+    (
+        "neuroserver-deps.tar.xz",
+        f"https://video-models.topazlabs.com/neuroserver/{NEUROSERVER_VERSION}/windows/neuroserver-deps.tar.xz",
+    ),
+    (
+        "neuroserver.tar.xz",
+        f"https://video-models.topazlabs.com/neuroserver/{NEUROSERVER_VERSION}/windows/neuroserver.tar.xz",
+    ),
+]
+
 # Build the embedded filename list
 FILES = []
 
@@ -468,6 +480,9 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
     f.write("echo.\n")
     f.write("echo.\n")
     f.write("echo.\n")
+
+    f.write("timeout /t 2 /nobreak >nul\n")
+
     f.write("echo ===========================================\n")
     f.write("echo           Missing File Report\n")
     f.write("echo ===========================================\n")
@@ -484,14 +499,69 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
         f.write(")\n")
 
     f.write('if "%MISSING_COUNT%"=="0" (\n')
-    f.write("    echo All model files are present.\n")
+    f.write("    echo        All model files are present.\n")
     f.write(") else (\n")
     f.write("    echo ===========================================\n")
     f.write("    echo Missing Files: %MISSING_COUNT%\n")
     f.write('    echo Missing list saved to: "%MIRROR_ROOT%\\Topaz_Model_Downloader_Creator_Error.txt"\n')
     f.write("    echo ===========================================\n")
     f.write(")\n")
+
     f.write("echo.\n")
+    f.write("echo ===========================================\n")
+    f.write("echo        Neuroserver Download Section\n")
+    f.write("echo ===========================================\n")
+    f.write("echo.\n")
+
+    f.write(f'if not exist "%MIRROR_ROOT%\\neuroserver\\{NEUROSERVER_VERSION}\\windows" mkdir "%MIRROR_ROOT%\\neuroserver\\{NEUROSERVER_VERSION}\\windows"\n\n')
+
+    for i, (name, url) in enumerate(NEUROSERVER_FILES, start=1):
+        f.write(f"echo [Neuroserver {i}/{len(NEUROSERVER_FILES)}] {name}\n")
+        f.write(f'if exist "%MIRROR_ROOT%\\neuroserver\\{NEUROSERVER_VERSION}\\windows\\{name}" (\n')
+        f.write("    echo Already exists. Skipping.\n")
+        f.write(") else (\n")
+        f.write(f'    curl -L --fail --retry 2 --connect-timeout 5 -o "%MIRROR_ROOT%\\neuroserver\\{NEUROSERVER_VERSION}\\windows\\{name}" "{url}"\n')
+        f.write("    if errorlevel 1 (\n")
+        f.write(f"        echo FAILED: {name}\n")
+        f.write(f'        del "%MIRROR_ROOT%\\neuroserver\\{NEUROSERVER_VERSION}\\windows\\{name}" >nul 2>&1\n')
+        f.write("    )\n")
+        f.write(")\n")
+        f.write("echo.\n\n")
+    f.write("echo.\n")
+    f.write("echo   Topaz Neuro Downloader Complete\n")
+    f.write("echo.\n")
+    f.write("echo.\n")
+    f.write("echo.\n")
+
+    f.write("timeout /t 3 /nobreak >nul\n")
+
+    f.write("echo ===========================================\n")
+    f.write("echo       Neuroserver Missing File Report\n")
+    f.write("echo ===========================================\n")
+    f.write("set NEURO_MISSING_COUNT=0\n")
+    f.write("echo.\n")
+    f.write('del "%MIRROR_ROOT%\\Topaz_Neuroserver_Error.txt" >nul 2>&1\n')
+
+    for name, url in NEUROSERVER_FILES:
+        safe_name = safe_echo(name)
+        f.write(f'if not exist "%MIRROR_ROOT%\\neuroserver\\{NEUROSERVER_VERSION}\\windows\\{name}" (\n')
+        f.write("    set /a NEURO_MISSING_COUNT+=1\n")
+        f.write(f"    echo    {safe_name}\n")
+        f.write(f'    echo {safe_name}>>"%MIRROR_ROOT%\\Topaz_Neuroserver_Error.txt"\n')
+        f.write(")\n")
+
+    f.write('if "%NEURO_MISSING_COUNT%"=="0" (\n')
+    f.write("    echo     All Neuroserver files are present.\n")
+    f.write(") else (\n")
+    f.write("    echo ===========================================\n")
+    f.write("    echo Missing Neuroserver Files: %NEURO_MISSING_COUNT%\n")
+    f.write('    echo Missing list saved to: "%MIRROR_ROOT%\\Topaz_Neuroserver_Error.txt"\n')
+    f.write("    echo ===========================================\n")
+    f.write(")\n")
+    f.write("echo.\n")
+
+#    f.write("echo space for silverlight & silverlight 2.5"(\n')
+
     f.write("echo ===========================================\n")
     f.write("echo Started : %STARTTIME%\n")
     f.write("echo Finished: %TIME%\n")
