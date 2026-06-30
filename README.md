@@ -27,7 +27,7 @@ This project recreates the expected download structure locally, allowing the sof
 ## Repository Statistics
 
 * **Model files:** 325
-* ** Neuroserver:** 2
+* **Neuroserver:** 2
 * **Approximate size:** 78.9 GB
 
 ---
