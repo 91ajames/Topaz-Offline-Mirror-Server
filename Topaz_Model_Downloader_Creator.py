@@ -635,6 +635,7 @@ with OUT_BAT.open("w", encoding="utf-8", newline="\r\n") as f:
     f.write('echo !HOST_IP! image-models.topazlabs.com\n')
     f.write('echo !HOST_IP! models-r2.topazlabs.com\n')
     f.write('echo !HOST_IP! models-bal.topazlabs.com\n')
+    f.write('echo !HOST_IP! video-models.topazlabs.com\n')
     f.write('echo.\n')
     f.write("echo ===========================================\n")
     f.write('echo.\n')
